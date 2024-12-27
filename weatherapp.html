@@ -4,9 +4,151 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.jsdelivr.net/npm/axios@1.6.7/dist/axios.min.js"></script>
-    <link href="src/styles.css" rel="stylesheet" type="text/css" />
+    <link href="/styling.css" rel="stylesheet" type="text/css" />
+    
     <title>MTozanaWeatherApp</title>
-   
+    <style>
+      
+body {
+background-image: url("https://media.istockphoto.com/id/157287159/photo/picture-of-a-mountain-top-from-above-the-clouds.jpg?s=612x612&w=0&k=20&c=68m_4M6q2peClbXel0AtqyFM2Z6zsB_UYS-mgJfI0SU=");
+background-size: cover ;
+background-position: center;
+font-family: "Roboto", sans-serif;
+}
+
+a {
+color: darkblue;
+}
+
+.weather-app {
+background: radial-gradient(circle at 0.7% 1%, rgb(215, 248, 247) 0%, rgb(102, 188, 239) 100.2%);
+max-width: 600px;
+margin: 60px auto;
+padding: 30px;
+border-radius: 10px;
+box-shadow: 0 30px 50px rgba(65, 50, 100, 0.08);
+}
+
+header {
+border-bottom:  1px solid white;
+padding-bottom: 30px;
+}
+
+.search-form-input {
+background-color: #f9f7fe;
+border: none;
+color: rgba(39, 33, 66, 0.4);
+font-size: 16px;
+padding: 20px;
+width: 75%;
+border-radius: 6px;
+}
+
+.search-form-button{
+margin-left: 5px;
+font-size: 16px;
+background-color: rgb(102, 188, 239);
+color: white;
+border: none;
+padding: 20px;
+line-height: 1;
+border-radius: 5px;
+}
+
+main {
+padding: 30px 0;
+}
+
+.weather-app-data {
+display: flex;
+justify-content: space-between;
+}
+.current-temperature {
+font-size: 48px;
+}
+
+.current-weather {
+display: flex;
+justify-content: space-between;
+}
+
+.weather-app-city {
+font-size: 38px;
+font-weight: 900;
+margin: 0;
+}
+.weather-app-details  {
+color: rgba(39, 33, 66, 0.4);
+font-size: 16px;
+font-weight: 400;
+line-height: 24px;
+}
+
+.weather-app-temperature-container {
+display: flex;
+}
+.weather-app-details strong{
+color: darkblue;
+}
+
+.weather-app-icon {
+width: 88px;
+height: 88px;
+}
+
+.weather-app-temperature{
+font-size: 80px;
+font-weight: bold;
+}
+
+.weather-app-unit {
+font-size: 30px;
+position: relative;
+margin-top: 6px;
+}
+
+.weather-forecast {
+display: flex;
+justify-content: space-around;
+margin-top: 30px;
+}
+
+.weather-forecast-date {
+text-align: center;
+color: rgba(39, 33, 66, 0.4);
+font-size: 16px;
+line-height: 20px;
+margin-bottom: 10px;
+}
+
+.weather-forecast-icon {
+width: 88px;
+height: 88px;
+display: block;
+margin: 0 auto;
+}
+.weather-forecast-temperatures {
+text-align: center;
+color: darkblue;
+margin-top: 10px;
+display: flex;
+justify-content: center;
+}
+
+.weather-forecast-temperature {
+padding: 0 10px;
+}
+
+
+footer {
+border-top: 1px solid #f9f7fe;
+text-align: center;
+padding-top: 15px;
+
+color: rgba(39, 33, 66, 0.4);
+}
+    </style>
+</head>
 <body>
   <div class="weather-app">
     <header>
@@ -52,7 +194,118 @@
       </p>
     </footer>
   </div>
-  <script  src="src/index.js">
+  <script >
+    function refreshWeather(response) {
+    let temperatureElement = document.querySelector("#temperature");
+    let temperature = response.data.temperature.current;
+    let cityElement = document.querySelector("#city");
+    let descriptionElement = document.querySelector("#description");
+    let humidityElement = document.querySelector("#humidity");
+    let windSpeedElement = document.querySelector("#wind-speed");
+    let timeElement = document.querySelector("#time");
+    let date = new Date(response.data.time * 1000);
+    let iconElement = document.querySelector("#icon");
+    
+    cityElement.innerHTML = response.data.city;
+    timeElement.innerHTML = formatDate(date);
+    descriptionElement.innerHTML = response.data.condition.description;
+    humidityElement.innerHTML = `${response.data.temperature.humidity}%`;
+    windSpeedElement.innerHTML = `${response.data.wind.speed}km/h`;
+    temperatureElement.innerHTML = Math.round(temperature);
+    iconElement.innerHTML = `<img src="${response.data.condition.icon_url}" class="weather-app-icon" />`;
+    
+    getForecast(response.data.city);
+    }
+    
+    function formatDate(date) {
+    let minutes = date.getMinutes();
+    let hours = date.getHours();
+    let days = [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    ];
+    let day = days[date.getDay()];
+    
+    if (minutes < 10) {
+    minutes = `0${minutes}`;
+    }
+    
+    return `${day} ${hours}:${minutes}`;
+    }
+    
+    function searchCity(city) {
+    let apiKey = "b2a5adcct04b33178913oc335f405433";
+    let apiUrl = `https://api.shecodes.io/weather/v1/current?query=${city}&key=${apiKey}&units=metric`;
+    axios.get(apiUrl).then(refreshWeather);
+    }
+    
+    function handleSearchSubmit(event) {
+    event.preventDefault();
+    let searchInput = document.querySelector("#search-form-input");
+    
+    searchCity(searchInput.value);
+    }
+    
+    function formatDay(timestamp) {
+    let date = new Date(timestamp * 1000);
+    let days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    
+    return days[date.getDay()];
+    }
+    
+    
+        
+    function getForecast(city) {
+        let apiKey = "20o57t7ba3d4078aa9d304c18d72faf5";
+        let apiUrl = `https://api.shecodes.io/weather/v1/forecast?query=${city}&key=${apiKey}&units=metric`;
+    
+        axios(apiUrl).then(displayForecast);
+        }
+        
+        function displayForecast(response) {
+        let forecast = document.querySelector("#forecast");
+        let days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+        let forecastHtml = "";
+        
+        response.data.daily.forEach(function (day, index) {
+        if (index < 5) {
+          forecastHtml =
+            forecastHtml +
+        
+            `<div class="weather-forecast-day">
+            <div class="weather-forecast-date">${formatDay(day.time)}</div>
+        
+            <img src="${day.condition.icon_url}" class="weather-forecast-icon" />
+            <div class="weather-forecast-temperatures">
+              <div class="weather-forecast-temperature">
+                <strong>${Math.round(day.temperature.maximum)}°</strong>
+              </div>
+              <div class="weather-forecast-temperature">${Math.round(
+                day.temperature.minimum
+              )}°</div>
+            </div>
+          </div> 
+          `;
+        }
+        });
+        
+        let forecastElement = document.querySelector("#forecast");
+        forecastElement.innerHTML = forecastHtml;
+        }
+    
+    
+    
+    let searchFormElement = document.querySelector("#search-form");
+    searchFormElement.addEventListener("submit", handleSearchSubmit);
+    
+    searchCity();
+    displayForecast();
+    
   </script>     
 
 </body>
